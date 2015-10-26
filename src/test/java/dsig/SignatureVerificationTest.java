@@ -3,7 +3,7 @@ package dsig;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import exception.SignatureValidationException;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class SignatureVerificationTest
@@ -18,14 +18,14 @@ public class SignatureVerificationTest
     public void testSignatureVerificationDOM()
     {
         String productId = "100";
-        Document receipt = null;
+        Document receiptDOM = null;
         try
         {
-            receipt = ReceiptSignatureHelper.getSignedReceiptDoc(productId);
+            receiptDOM = ReceiptSignatureHelper.getSignedReceiptDoc(productId);
         }
         catch(Exception e)
         {
-            assertNotNull("Error signing receipt", e);
+            assertNull("Error signing receipt", e);
         }
         SignatureVerification sigVer = null;
         try
@@ -34,7 +34,47 @@ public class SignatureVerificationTest
         }
         catch(Exception e)
         {
-            assertNotNull("Error verifying receipt", e);
+            assertNull("Error verifying receipt", e);
+        }
+        
+        boolean valid = false;
+        try
+        {
+            valid = sigVer.validateMSStoreReceipt(receiptDOM);
+        }
+        catch (SignatureValidationException e)
+        {
+            assertNull("Error validating receipt", e);
+        }
+        assertTrue("Invalid receipt", valid);
+    }
+
+    /**
+     * Test XML DSig using an XML String as input
+     * KeyInfo is contained in the receipt
+     * 
+     */
+    @Test
+    public void testSignatureVerificationString()
+    {
+        String productId = "100";
+        String receipt = null;
+        try
+        {
+            receipt = ReceiptSignatureHelper.getSignedReceipt(productId);
+        }
+        catch(Exception e)
+        {
+            assertNull("Error signing receipt", e);
+        }
+        SignatureVerification sigVer = null;
+        try
+        {
+            sigVer = new SignatureVerification(null, new LocalCertificateRetrievalStrategy());
+        }
+        catch(Exception e)
+        {
+            assertNull("Error verifying receipt", e);
         }
         boolean valid = false;
         try
@@ -43,7 +83,7 @@ public class SignatureVerificationTest
         }
         catch (SignatureValidationException e)
         {
-            assertNotNull("Error validating receipt", e);
+            assertNull("Error validating receipt", e);
         }
         assertTrue("Invalid receipt", valid);
     }
